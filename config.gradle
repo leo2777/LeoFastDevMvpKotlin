@@ -1,0 +1,126 @@
+ext {
+
+    /**
+     * 基础配置
+     */
+    android = [
+            compileSdk               : 33,
+            minSdk                   : 21,
+            targetSdk                : 32,
+            versionCode              : 1,
+            versionName              : "1.0.0",
+            testInstrumentationRunner: "androidx.test.runner.AndroidJUnitRunner",
+            consumerProguardFiles    : "consumer-rules.pro"
+    ]
+
+    /**
+     * 版本号
+     */
+    version = [
+            coreKtx              : "1.7.0",
+            appcompat            : "1.3.0",
+            material             : "1.4.0",
+            constraintLayout     : "2.1.3",
+            navigationFragmentKtx: "2.3.5",
+            navigationUiKtx      : "2.3.5",
+            junit                : "4.13.2",
+            testJunit            : "1.1.3",
+            espresso             : "3.4.0",
+
+            //网络请求
+            retrofit             : "2.4.0",
+            okHttp               : "3.10.0",
+            okHTtpLogging        : "3.9.0",
+            glide                : "4.5.0",
+            glideTransformations : "2.0.1",
+            gson                 : "2.8.2",
+
+            //rx
+            rxAndroid            : "2.0.2",
+            rxJava               : "2.1.12",
+            rxBus                : "1.5",
+
+            //gif
+            gifView              : "1.2.25",
+            //logger
+            logger               : "2.2.0",
+            //toasty
+            toasty               : "1.5.2",
+            //banner
+            banner               : "2.2.2",
+            //智能刷新控件（smartRefreshLayout）
+            smart_refresh        : "2.0.5",
+            //布局适配
+            autoSize             : "1.2.1",
+            //recyclerView  适配器 （BRVAH）
+            adapterHelper        : "4.0.0-beta04",
+            //流式布局
+            flexBoxLayout        : "3.0.0",
+            // 本地储存 dataStore (替换sp)
+            dataStore            : "1.0.0",
+            //webView
+            agentWeb             : "v5.0.6-androidx"
+    ]
+
+    /**
+     * 项目依赖
+     */
+    dependencies = [
+
+            coreKtx                    : "androidx.core:core-ktx:$version.coreKtx",
+            appcompat                  : "androidx.appcompat:appcompat:$version.appcompat",
+            material                   : "com.google.android.material:material:$version.material",
+            constraintLayout           : "androidx.constraintlayout:constraintlayout:$version.constraintLayout",
+            navigationFragmentKtx      : "androidx.navigation:navigation-fragment-ktx:$version.navigationFragmentKtx",
+            navigationUiKtx            : "androidx.navigation:navigation-ui-ktx:$version.navigationUiKtx",
+            junit                      : "junit:junit:$version.junit",
+            testJunit                  : "androidx.test.ext:junit:$version.testJunit",
+            espresso                   : "androidx.test.espresso:espresso-core:$version.espresso",
+
+            //网络请求
+            retrofit                   : "com.squareup.retrofit2:retrofit:$version.retrofit",
+            retrofitGson               : "com.squareup.retrofit2:converter-gson:$version.retrofit",
+            retrofitRxJava             : "com.squareup.retrofit2:adapter-rxjava2:$version.retrofit",
+            okHttp                     : "com.squareup.okhttp3:okhttp:$version.okHttp",
+            okHttpLogging              : "com.squareup.okhttp3:logging-interceptor:$version.okHTtpLogging",
+            glide                      : "com.github.bumptech.glide:glide:$version.glide",
+            glideTransformations       : "jp.wasabeef:glide-transformations:$version.glideTransformations",
+            gson                       : "com.google.code.gson:gson:$version.gson",
+
+            //rx
+            rxAndroid                  : "io.reactivex.rxjava2:rxandroid:$version.rxAndroid",
+            rxJava                     : "io.reactivex.rxjava2:rxjava:$version.rxJava",
+            rxBus                      : "com.blankj:rxbus:$version.rxBus",
+
+            gifView                    : "pl.droidsonroids.gif:android-gif-drawable:$version.gifView",
+
+            //log
+            logger                     : "com.orhanobut:logger:$version.logger",
+            //吐司
+            toasty                     : "com.github.GrenderG:Toasty:$version.toasty",
+            //轮播图 banner
+            banner                     : "io.github.youth5201314:banner:$version.banner",
+
+            //智能刷新控件（smartRefreshLayout）
+            smart_refresh_kernel       : "io.github.scwang90:refresh-layout-kernel:$version.smart_refresh",
+            smart_refresh_head_classics: "io.github.scwang90:refresh-header-classics:$version.smart_refresh",
+            smart_refresh_head_radar   : "io.github.scwang90:refresh-header-radar:$version.smart_refresh",
+            smart_refresh_head_falsify : "io.github.scwang90:refresh-header-falsify:$version.smart_refresh",
+            smart_refresh_head_material: "io.github.scwang90:refresh-header-material:$version.smart_refresh",
+            smart_refresh_food_ball    : "io.github.scwang90:refresh-footer-ball:$version.smart_refresh",
+            smart_refresh_food_classics: "io.github.scwang90:refresh-footer-classics:$version.smart_refresh",
+
+            //布局适配
+            autoSize                   : "com.github.JessYanCoding:AndroidAutoSize:v$version.autoSize",
+            //recyclerView  适配器 （BRVAH）
+            adapterHelper              : "io.github.cymchad:BaseRecyclerViewAdapterHelper:$version.adapterHelper",
+            //流式布局
+            flexBoxLayout              : "com.google.android.flexbox:flexbox:$version.flexBoxLayout",
+            // 本地储存 dataStore (替换sp)
+            dataStore                  : "androidx.datastore:datastore-preferences:$version.dataStore",
+            dataStoreCore              : "androidx.datastore:datastore-preferences-core:$version.dataStore",
+
+            agentWeb                   : "com.github.Justson.AgentWeb:agentweb-core:$version.agentWeb"
+    ]
+
+}
