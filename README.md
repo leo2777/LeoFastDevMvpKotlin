@@ -98,3 +98,20 @@ dependencies {
 添加完之后，再 **Sync Now** 一下，就搞定了。
 
 ## 使用方法
+
+### 统一依赖管理
+
+框架采用 config.gradle 进行依赖管理，详细请看此篇文章 [《ndroid - 统一依赖管理(config.gradle)》](https://juejin.cn/post/7224007334513770551) 这里仅仅说明操作步骤：
+
+> - 新建或者下载项目的 「config.gradle」 文件并编写引用
+> - 根目录的 「build.gradle」文件引入 「config.gradle」也就是 **apply from "config.gradle"**
+> - 在所有module当中的 「build.gradle」文件下，添加活着依赖代码
+
+
+
+
+
+
+
+    
+    
