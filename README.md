@@ -235,8 +235,472 @@ dependencies {
 ```
 ### 创建项目的 Application
 
+#### 1.继承BaseApplication
+
+创建自己的 Application 继承 **BaseApplication**。注意自己创建的Application不要命名为 **BaseApplication** 因为框架当中已经定义了这个名字。
+
+```kotlin
+package leo.dev.mvp.kt.app
+
+import android.view.Gravity
+import com.orhanobut.logger.Logger
+import com.orhanobut.logger.PrettyFormatStrategy
+import es.dmoral.toasty.Toasty
+import leo.dev.mvp.kt.common.LoggerAdapter
+import leo.dev.mvp.kt.constants.Constants
+import leo.study.lib_base.base.BaseApplication
+import leo.study.lib_base.image.ImageOptions
+
+
+/**
+ *
+ * ***********************************************************************
+ *the project desc: 应用 application
+ *this name is LeoDevMvpApplication
+ *this from package LeoDevMvpKotlinDemo
+ *this create by machine leo mark
+ *this full time on 2023年04月19日 14:53:09
+ *this developer is 冯立仁
+ *this developer QQ is 2549732107
+ * ***********************************************************************
+ */
+class LeoDevMvpApplication : BaseApplication() {
+
+    private val tag: String = "leo_dev_mvp_kotlin_demo"
+
+    override var dataStoreName: String = Constants.DataStoreNameValue
+    override var sharedPrfName: String = Constants.SharedPrfNameValue
+
+    override fun init() {
+        //初始化logger
+        initLogger()
+        //初始化toasty
+        initToasty()
+        //初始化 图片加载
+        initImage()
+    }
 
 
 
-    
-    
+    /**
+     * 初始化 logger 日志
+     *
+     * 其他具体使用请查看：[logger GitHub网址](https://github.com/orhanobut/logger)
+     */
+    private fun initLogger() {
+        val formatStrategy = PrettyFormatStrategy.newBuilder()
+            .showThreadInfo(false) //（可选）是否显示线程信息。 默认值为true
+            .methodCount(2)        //（可选）要显示的方法行数。 默认2
+            .methodOffset(0)       //（可选）设置调用堆栈的函数偏移值，0的话则从打印该Log的函数开始输出堆栈信息，默认是0
+            .tag(tag)                  //（可选）每个日志的全局标记。 默认PRETTY_LOGGER（如上图）
+            .build()
+        Logger.addLogAdapter(LoggerAdapter(formatStrategy))
+    }
+
+    /**
+     * 初始化 颜色 toast
+     *
+     * 其他具体使用请查看：[toasty Github网址](https://github.com/GrenderG/Toasty)
+     */
+    private fun initToasty() {
+        Toasty.Config.getInstance()
+//            .tintIcon(boolean tintIcon) // optional (apply textColor also to the icon)
+//            .setToastTypeface(@NonNull Typeface typeface) // optional
+            .setTextSize(14) // optional
+//            .allowQueue(boolean allowQueue) // optional (prevents several Toastys from queuing)
+            .setGravity(Gravity.CENTER) // optional (set toast gravity, offsets are optional)
+//            .supportDarkTheme(boolean supportDarkTheme) // optional (whether to support dark theme or not)
+//            .setRTL(boolean isRTL) // optional (icon is on the right)
+            .apply(); // required
+    }
+
+
+    /**
+     * 初始化图片加载代理
+     *
+     */
+    private fun initImage() {
+        //设置配置类
+        val imageOptions = ImageOptions.Builder(this)
+            .placeholderResId(leo.study.lib_base.R.drawable.icon_default_image_loading) //预览图片
+            .errorResId(leo.study.lib_base.R.drawable.icon_default_image_error)  //错误图片
+//            .width(300)   //目标宽度
+//            .height(300)  //目标高度
+//            .isCenterCrop(false)  //是否居中裁剪
+//            .isCenterInside(true) //是否是显示所有居中
+//            .config(Bitmap.Config.ARGB_8888) //Bitmap类型
+            .build()
+        //设置代理类
+      ImageLoaderHelper.instance.setImgLoaderProxy(GlideLoaderProcessor(imageOptions))
+
+
+    }
+
+
+}
+```
+
+其中，dataStoreName，sharedPrfName 为扩展函数必备的存储持久化数据保存名字，一个是 dataStore，另外一个是 SharedPreferences，建议两个都写上自定义的名字。
+
+另外如果复制上面的代码，还会有两个地方报错，分别是 LoggerAdapter logger 适配器以及GlideLoaderProcessor glide图片加载代理类，不用着急，继续往下看。
+
+#### 2.创建 logger adapter log日志适配器
+
+随便创建一个类，然后继承 **AndroidLogAdapter**   代码如下（可直接复制，修改文件名）:
+
+```kotlin 
+
+class LoggerAdapter(formatStrategy: FormatStrategy) : AndroidLogAdapter(formatStrategy) {
+    /**
+     * 是否开启log日志，true 开启， false 关闭
+     * 上线版本的时候需要关闭日志，
+     * 采用 [BuildConfig.DEBUG] 来判断
+     *
+     * @param [priority] 给框架使用，无需理会，只需修改返回值
+     * @param [tag] 给框架使用，无需理会，只需修改返回值
+     * @return true 开启， false 关闭
+     */
+    override fun isLoggable(priority: Int, tag: String?): Boolean {
+        return BuildConfig.DEBUG;
+    }
+}
+
+```
+
+如果项目是第一次创建，BuildConfig.DEBUG 可能会爆红，直接rebuild一下项目，或者打包一下项目APP即可。
+
+#### 3.创建图片加载代理类
+
+创建一个类，继承 **ImageProxy** 类，实现里面所有的加载方法即可。代码如下：
+
+```kotlin
+open class GlideLoaderProcessor(options: ImageOptions?) : ImageProxy {
+
+    private var proxy: ImageProxy? = null;
+
+    private val options: ImageOptions;
+
+    private val requestOptions: RequestOptions = RequestOptions()
+
+
+    init {
+        this.options = options!!
+        setShareOptions()
+    }
+
+    /**
+     * 设置共享的options
+     */
+    private fun setShareOptions() {
+        //设置是否局部裁剪显示
+        if (options.isCenterCrop) requestOptions.centerCrop().options
+        //设置是否全图居中
+        if (options.isCenterInside) requestOptions.centerInside().options
+        //设置加载错误图片
+        if (options.errorResId != 0) requestOptions.error(options.errorResId).options
+        //设置加载中显示的图片
+        if (options.placeholderResId != 0) requestOptions.placeholder(options.placeholderResId).options
+        //设置加载的宽高
+        if (options.targetHeight != 0 && options.targetWidth != 0) requestOptions.override(
+            options.targetWidth,
+            options.targetHeight
+        ).options
+
+
+        //·······  如果还需要更多属性设置，请完善ImgLoaderOptions类之后，再进行操作
+    }
+
+
+    private fun obtain(): ImageProxy {
+        return this
+    }
+
+
+    /**
+     * 加载图片  网络地址
+     * @param [view] 显示的view
+     * @param [path] 加载地址
+     * @return 当前的代理类
+     */
+    override fun loadImage(view: View?, path: String?): ImageProxy {
+        if (view is ImageView) {
+            options.context?.let {
+                Glide
+                    .with(it)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(path)
+                    .into(view)
+            }
+        }
+        return obtain()
+    }
+
+    /**
+     * 加载资源图， R.drawable...
+     * @param [view] 显示的view
+     * @param [drawable] 资源地址
+     * @return 当前的代理类
+     */
+    override fun loadImage(view: View?, drawable: Int): ImageProxy {
+        if (view is ImageView) {
+            options.context?.let {
+                Glide
+                    .with(it)
+                    .setDefaultRequestOptions(requestOptions)
+                    .asDrawable()
+                    .load(drawable)
+                    .into(view)
+            }
+        }
+        return obtain()
+    }
+
+    /**
+     * 显示图片文件
+     * @param [view] 显示的view
+     * @param [file] 资源文件
+     * @return 当前的代理类
+     */
+    override fun loadImage(view: View?, file: File?): ImageProxy {
+        if (view is ImageView) {
+            options.context?.let {
+                Glide
+                    .with(it)
+                    .setDefaultRequestOptions(requestOptions)
+                    .asFile()
+                    .load(file)
+                    .into(view)
+            }
+        }
+        return obtain()
+    }
+
+    /**
+     * 加载GIF
+     * @param [view] 显示的view
+     * @param [url] 图片地址
+     * @return 当前代理类
+     */
+    override fun loadGif(view: View?, url: String?): ImageProxy {
+        if (view is ImageView) {
+            options.context?.let {
+                Glide
+                    .with(it)
+                    .setDefaultRequestOptions(requestOptions)
+                    .asGif()
+                    .load(url)
+                    .into(view)
+            }
+        }
+
+        return obtain()
+    }
+
+    /**
+     * 加载自定义高宽图片
+     * @param [view] 显示的view
+     * @param [url] 图片地址
+     * @param [width] 图片宽度 px
+     * @param [height] 图片高度 px
+     * @return 当前代理类
+     */
+    override fun loadTargetWidthAndHeight(
+        view: View?,
+        url: String?,
+        width: Int,
+        height: Int,
+    ): ImageProxy {
+        if (view is ImageView) {
+            options.context?.let {
+                Glide
+                    .with(it)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(url)
+                    .override(width, height)
+                    .into(view)
+            }
+        }
+        return obtain()
+    }
+
+    /**
+     * 加载缩略图
+     * @param [view] 显示的view
+     * @param [url] 图片地址
+     * @param [scan] 缩略数，百分比
+     * @return 当前代理类
+     */
+    override fun loadThumb(view: View?, url: String?, scan: Float): ImageProxy {
+        if (view is ImageView) {
+            options.context?.let {
+                Glide
+                    .with(it)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(url)
+                    .thumbnail(scan)
+                    .into(view)
+            }
+        }
+        return obtain()
+    }
+
+    /**
+     * 加载圆形图片
+     * @param [view] 显示view
+     * @param [url] 图片地址
+     * @return 当前代理类
+     */
+    override fun loadCircleImage(view: View?, url: String?): ImageProxy {
+        if (view is ImageView) {
+            options.context?.let {
+                Glide
+                    .with(it)
+                    .setDefaultRequestOptions(requestOptions)
+                    .applyDefaultRequestOptions(RequestOptions.bitmapTransform(CircleCrop()))
+                    .load(url)
+                    .into(view)
+            }
+        }
+        return obtain()
+    }
+
+    override fun loadCircleImage(view: View?, url: Int?): ImageProxy {
+        if (view is ImageView) {
+            options.context?.let {
+                Glide
+                    .with(it)
+                    .setDefaultRequestOptions(requestOptions)
+                    .applyDefaultRequestOptions(RequestOptions.bitmapTransform(CircleCrop()))
+                    .load(url)
+                    .into(view)
+            }
+        }
+        return obtain()
+    }
+
+    /**
+     * 加载圆角图片
+     * @param [view] 显示的view
+     * @param [url] 图片地址
+     * @param [shapeValue] 半径值
+     * @return 当前代理类
+     */
+    override fun loadRoundImage(view: View?, url: String?, shapeValue: Int): ImageProxy {
+        if (view is ImageView) {
+            options.context?.let {
+                Glide
+                    .with(it)
+                    .setDefaultRequestOptions(requestOptions)
+                    .applyDefaultRequestOptions(
+                        RequestOptions.bitmapTransform(
+                            RoundedCorners(
+                                shapeValue
+                            )
+                        )
+                    )
+                    .load(url)
+                    .into(view)
+            }
+        }
+        return obtain()
+    }
+
+    /**
+     * 获取drawable
+     *
+     * @param [url]      地址
+     * @param [loaderCallback] 结果回调
+     * @return 当前代理类
+     */
+    override fun getDrawable(url: String?, loaderCallback: ImageLoaderCallback?): ImageProxy {
+        Glide
+            .with(options.context!!)
+            .load(url)
+            .listener(object : RequestListener<Drawable?> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: com.bumptech.glide.request.target.Target<Drawable?>?,
+                    isFirstResource: Boolean,
+                ): Boolean {
+                    loaderCallback!!.onFail("图片下载失败！")
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: com.bumptech.glide.request.target.Target<Drawable?>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean,
+                ): Boolean {
+                    if (resource != null) {
+                        loaderCallback!!.onSuccess(resource, "图片下载成功！")
+                        return false
+                    }
+                    loaderCallback!!.onFail("图片下载失败！")
+                    return false
+                }
+            })
+            .submit()
+        return obtain()
+    }
+
+    /**
+     * 设置图片加载参数
+     *
+     * @return 返回当前
+     */
+    override fun setImgLoaderOptions(options: ImageOptions?): ImageProxy {
+        return proxy!!.setImgLoaderOptions(options)
+    }
+
+    /**
+     * 清理内存缓存
+     * @return 当前代理类
+     */
+    override fun clearMemoryCache(): ImageProxy {
+        try {
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                options.context?.let {
+                    Glide.get(it)
+                        .clearMemory()
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return obtain()
+    }
+
+    /**
+     * 清理磁盘缓存
+     * @return 当前代理类
+     */
+    override fun clearDiskCache(): ImageProxy {
+        try {
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                Thread {
+                    options.context?.let { Glide.get(it).clearDiskCache() }
+                }.start()
+            } else {
+                options.context?.let {
+                    Glide.get(it)
+                        .clearDiskCache()
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return obtain()
+    }
+
+}
+```
+
+示例代码当中采用的是 glide 图片加载，如果项目是其他图片加载框架，只需要把实现方法切换即可。关于图片加载，下文进阶使用会讲， 可先跳转观看。
+
+### 推荐的MVP项目结构
+
+步骤到这里，基本就可直接创建Activity了，但是推荐采用如下的包结构，并且有自动创建模版插件使用。
+
