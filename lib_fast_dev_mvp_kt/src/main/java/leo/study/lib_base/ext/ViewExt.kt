@@ -79,7 +79,7 @@ private var <T : View> T.lastClickTime: Long
 //私有扩展方法，判断能否触发点击事件
 private fun <T : View> T.canClick(): Boolean {
     var flag = false
-    var now = System.currentTimeMillis()
+    val now = System.currentTimeMillis()
     if (now - this.lastClickTime >= this.delayTime) {
         flag = true
         this.lastClickTime = now
